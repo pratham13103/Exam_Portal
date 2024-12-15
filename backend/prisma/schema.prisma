@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model User {
+//   id        String   @id @default(uuid())
+//   name      String?
+//   email     String   @unique
+//   phone     String?  @unique
+//   password  String   @unique
+//   role      String?
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String?  @unique
+  password  String
+  role      String   // "student" or "teacher"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tests     Test[]   @relation("UserTests")
+  submissions Submission[]
+}
+
+
+model Test {
+  id          Int      @id @default(autoincrement())
+  testName    String
+  teacher     User     @relation("UserTests", fields: [teacherId], references: [id])
+  teacherId   String
+  questions   Json     // Array of questions
+  maxMarks    Int
+  createdAt   DateTime @default(now())
+  submissions Submission[]
+}
+
+model Submission {
+  id          Int      @id @default(autoincrement())
+  test        Test     @relation(fields: [testId], references: [id])
+  testId      Int
+  student     User     @relation(fields: [studentId], references: [id])
+  studentId   String
+  answers     Json     // Array of student answers
+  score       Int
+  submittedAt DateTime @default(now())
+}
